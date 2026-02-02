@@ -16,8 +16,8 @@ KP = 0.020
 POWER_CLIP_NORM = 0.60
 
 # Measured motor deadband: wheels start moving ~0.45
-MIN_MOVE = 0.45
-MAX_MOVE = 0.65
+MIN_MOVE = 0.40
+MAX_MOVE = 0.50
 
 STEER_SIGN = 1.0
 
