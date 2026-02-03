@@ -7,17 +7,19 @@ from motorgo import Plink, ControlMode
 LEFT_CH = 3
 RIGHT_CH = 1
 
-BLACK_LINE_THRESHOLD = 50.0  # If lux is below this, we're seeing a black line
+TARGET_LUX = 130
 DT = 0.03
 
-# Turning behavior
-TURN_STRONG = 0.40     # forward wheel
-TURN_WEAK = -0.20     # backward wheel
-POWER_CLIP_NORM = 0.80
+# Control in "normalized" space (0..1) then map to motor power that actually moves wheels
+BASE_NORM = 0.15
+KP = 0.030
+POWER_CLIP_NORM = 0.60
 
-# Measured motor deadband
-MIN_MOVE = 0.35
-MAX_MOVE = 0.85
+# Measured motor deadband: wheels start moving ~0.45
+MIN_MOVE = 0.40
+MAX_MOVE = 0.50
+
+STEER_SIGN = 1.0
 
 def clip(x, lo, hi):
     return lo if x < lo else hi if x > hi else x
@@ -58,18 +60,12 @@ def main():
 
         while True:
             lux = float(light.lux)
+            error = lux - TARGET_LUX
 
-            # If we see black -> turn right
-            # Left wheel forward, right wheel backward
-            if lux < BLACK_LINE_THRESHOLD:
-                left_u = TURN_STRONG
-                right_u = TURN_WEAK
-                state = "BLACK - TURN RIGHT"
-            else:
-                # White -> turn left
-                left_u = TURN_WEAK
-                right_u = TURN_STRONG
-                state = "WHITE - TURN LEFT"
+            steer = STEER_SIGN * KP * error
+
+            left_u = BASE_NORM - steer
+            right_u = BASE_NORM + steer
 
             left_u = clip(left_u, -POWER_CLIP_NORM, POWER_CLIP_NORM)
             right_u = clip(right_u, -POWER_CLIP_NORM, POWER_CLIP_NORM)
@@ -80,11 +76,7 @@ def main():
             left.power_command = left_cmd
             right.power_command = right_cmd
 
-            print(
-                f"lux={lux:6.1f} {state:20s} "
-                f"uL={left_u: .3f} uR={right_u: .3f} "
-                f"L={left_cmd: .3f} R={right_cmd: .3f}"
-            )
+            print(f"lux={lux:6.1f} err={error:6.1f} uL={left_u: .3f} uR={right_u: .3f} L={left_cmd: .3f} R={right_cmd: .3f}")
 
             time.sleep(DT)
 
