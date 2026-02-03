@@ -18,7 +18,7 @@ right_motor.power_command = 0
 # ========== ROBOT CONSTANTS ==========
 WHEEL_RADIUS = 1.0      # inches
 WHEELBASE = 8.5         # inches
-TICKS_PER_REV = 6.32   # <-- your calibrated value
+TICKS_PER_REV = 5   # <-- your calibrated value
 DT = 0.01              # integration time step (seconds)
 # ====================================
 
@@ -41,8 +41,9 @@ def update_odometry_rk4(x, y, theta, prev_left, prev_right):
     curr_left = left_motor.position
     curr_right = right_motor.position
 
-    delta_left = curr_left - prev_left
-    delta_right = curr_right - prev_right
+    # Apply direction corrections to encoder deltas (motors are physically flipped)
+    delta_left = (curr_left - prev_left) * LEFT_DIR
+    delta_right = (curr_right - prev_right) * RIGHT_DIR
 
     # Convert encoder ticks to linear distances
     left_dist = (delta_left / TICKS_PER_REV) * (2 * math.pi * WHEEL_RADIUS)

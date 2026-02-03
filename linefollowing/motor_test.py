@@ -29,7 +29,7 @@ def main():
         pwr = 0.0
         while pwr <= 1:
             left.power_command = pwr
-            right.power_command = pwr
+            right.power_command = -pwr
             print(f"pwr={pwr:.2f}")
             time.sleep(0.6)
             pwr += 0.05

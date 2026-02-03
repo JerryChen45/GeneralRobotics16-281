@@ -41,7 +41,7 @@ def main():
 
         # Set motor powers
         # Set the power command in the range [-1, 1]
-        left_motor.power_command = 1
+        left_motor.power_command = -1
 
         # Set the velocity command in rad/s
         right_motor.velocity_command = 1
