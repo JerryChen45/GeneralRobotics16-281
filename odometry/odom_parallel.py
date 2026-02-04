@@ -17,8 +17,8 @@ left_motor.power_command = 0
 right_motor.power_command = 0
 
 # ========== ROBOT CONSTANTS ==========
-WHEEL_RADIUS = 1.0      # inches
-WHEELBASE = 7.45         # inches
+WHEEL_RADIUS = 0.85      # inches
+WHEELBASE = 7.6         # inches
 TICKS_PER_REV = 6.2
 DT = 0.01               # seconds
 # ====================================
@@ -36,9 +36,9 @@ RIGHT_ENC_SIGN = -1     # right encoder decreases forward
 # ========== THREE MOTOR PAIRS ==========
 # Format: (left_power, right_power)
 MOTOR_PAIRS = [
-    (0.8, 0.8),
-    (-0.5, 0.6),
-    (0.4, -0.7)
+    (0.8, 0.5),
+    (-0.8, -0.5),
+    (0.8, 0.5)
 ]
 # ======================================
 
