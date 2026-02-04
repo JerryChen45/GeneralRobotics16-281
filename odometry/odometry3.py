@@ -28,10 +28,15 @@ LEFT_DIR = -1    # left motor is flipped
 RIGHT_DIR = 1    # right motor is normal
 # ====================================
 
-# ========== COMMAND ==========
-LEFT_POWER = 0.4
-RIGHT_POWER = 0.6
-# =============================
+# ========== COMMANDS (3 motor pairs) ==========
+# Format: (left_power, right_power)
+MOTOR_PAIRS = [
+    (0.3, 0.8),   # Command 1
+    (-0.5, -0.6
+     ),   # Command 2
+    (-0.35, 0.35)    # Command 3
+]
+# =============================================
 
 
 def update_odometry_rk4(state, prev_left, prev_right):
@@ -70,8 +75,8 @@ def update_odometry_rk4(state, prev_left, prev_right):
     def state_derivative(s):
         """Returns [dx/dt, dy/dt, dtheta/dt] given state s = [x, y, theta]"""
         return np.array([
-            v * np.cos(s[2]),      # dx/dt
-            v * np.sin(s[2]),      # dy/dt
+            v * np.sin(s[2]),      # dx/dt (if robot forward is along y)
+            v * np.cos(s[2]),      # dy/dt (if robot forward is along x)
             omega                   # dtheta/dt
         ])
 
@@ -122,13 +127,14 @@ def run_single_command(left_power, right_power, state, prev_left, prev_right):
     right_motor.power_command = 0
 
     x, y, theta = state
-    print(f"x={y:.2f} in, y={x:.2f} in, θ={np.degrees(theta):.1f}°\n")
+    print(f"x={x:.2f} in, y={y:.2f} in, θ={np.degrees(theta):.1f}°\n")
     return state, prev_left, prev_right
 
 
 # ================= MAIN =================
 if __name__ == "__main__":
     print("Starting odometry with RK4 integration (numpy version)")
+    print(f"Will execute {len(MOTOR_PAIRS)} motor command pairs")
     input("Place robot at (0,0,0). Press Enter...\n")
 
     # Initialize state as numpy array [x, y, theta]
@@ -137,16 +143,19 @@ if __name__ == "__main__":
     prev_right = right_motor.position
 
     try:
-        state, prev_left, prev_right = run_single_command(
-            LEFT_POWER, RIGHT_POWER,
-            state,
-            prev_left, prev_right
-        )
+        # Execute each motor pair in sequence
+        for i, (left_power, right_power) in enumerate(MOTOR_PAIRS, 1):
+            print(f"\n--- Command {i}/{len(MOTOR_PAIRS)} ---")
+            state, prev_left, prev_right = run_single_command(
+                left_power, right_power,
+                state,
+                prev_left, prev_right
+            )
 
         x, y, theta = state
-        print("=" * 50)
-        print(f"FINAL POSITION: x={y:.2f} in, y={-x:.2f} in")
-        print(f"({x}, {-y})")
+        print("\n" + "=" * 50)
+        print(f"FINAL POSITION: x={x:.2f} in, y={y:.2f} in")
+        print(f"({x:.2f}, {y:.2f})")
         print("=" * 50)
 
     except KeyboardInterrupt:
