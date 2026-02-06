@@ -19,7 +19,7 @@ right_motor.power_command = 0
 # ========== ROBOT CONSTANTS ==========
 WHEEL_RADIUS = 0.85      # inches
 WHEELBASE = 7.6         # inches
-TICKS_PER_REV = 6.2
+TICKS_PER_REV = 6.698
 DT = 0.01               # seconds
 # ====================================
 
@@ -30,15 +30,15 @@ RIGHT_MOTOR_DIR = 1
 
 # ========== ENCODER SIGNS ==========
 LEFT_ENC_SIGN = 1       # left encoder increases forward
-RIGHT_ENC_SIGN = -1     # right encoder decreases forward
+RIGHT_ENC_SIGN = 1     # right encoder decreases forward
 # ==================================
 
 # ========== THREE MOTOR PAIRS ==========
 # Format: (left_power, right_power)
 MOTOR_PAIRS = [
-    (0.8, 0.5),
-    (-0.8, -0.5),
-    (0.8, 0.5)
+    (-0.9, -0.72),
+    (0.63, -0.4),
+    (-0.55, 0.-7)
 ]
 # ======================================
 
@@ -123,9 +123,11 @@ if __name__ == "__main__":
                 prev_right,
                 i
             )
+            time.sleep(0.5)
 
         print("\n" + "=" * 50)
         print(f"FINAL POSITION: x={state[0]:.2f} in, y={state[1]:.2f} in")
+        print(f"({state[0]},{state[1]})")
         print("=" * 50)
 
     except KeyboardInterrupt:

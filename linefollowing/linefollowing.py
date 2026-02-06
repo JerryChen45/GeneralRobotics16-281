@@ -4,22 +4,22 @@ import board
 import adafruit_bh1750
 from motorgo import Plink, ControlMode
 
-LEFT_CH = 3
-RIGHT_CH = 1
+LEFT_CH = 1
+RIGHT_CH = 3
 
-TARGET_LUX = 68.0
+TARGET_LUX = 60
 DT = 0.03
 
 # Control in "normalized" space (0..1) then map to motor power that actually moves wheels
-BASE_NORM = 0.25
-KP = 0.020
+BASE_NORM = 0.4
+KP = 0.08
 POWER_CLIP_NORM = 0.60
 
 # Measured motor deadband: wheels start moving ~0.45
 MIN_MOVE = 0.40
 MAX_MOVE = 0.50
 
-STEER_SIGN = 1.0
+STEER_SIGN = -1.0
 
 def clip(x, lo, hi):
     return lo if x < lo else hi if x > hi else x
