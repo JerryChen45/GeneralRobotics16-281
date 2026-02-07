@@ -17,11 +17,12 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 1.5
-    k_d = 2
+    k_p = 15
+    k_d = 5
 
     prev_error = 0.0
     prev_t = time.time()
+    back_bias = 1.5
 
     while True:
         # timing
@@ -33,6 +34,7 @@ def main():
 
         # sensor
         g_theta = imu.gravity_vector[1]   # tilt estimate
+        # print("gtheta =" + f"{g_theta}")
 
         # PD
         error = -g_theta                  # target = 0
@@ -42,13 +44,15 @@ def main():
         u = k_p * error + k_d * d_error
 
         # saturate
-        u = max(min(u, 1.0), -1.0)
-
+        u = max(min(u, 0.7), -0.7)
+        if u < 0 and u != 0.7:
+            u *= back_bias
         # apply
-        left.power_command = u
+        print(u)
+        left.power_command = -u
         right.power_command = u
 
-        time.sleep(0.005)   # ~200 Hz
+        time.sleep(0.01)   # ~200 Hz
 
 if __name__ == "__main__":
     main()
