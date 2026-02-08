@@ -59,7 +59,7 @@ def main():
         u = k_p * error + k_d * d_error
 
         # saturate
-        u = max(min(u, 0.7), -0.7)
+        u = max(min(u, 0.7), -0.9)
         # apply
         print(u)
         left.power_command = -u
