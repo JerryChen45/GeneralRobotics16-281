@@ -17,8 +17,8 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 17
-    k_d = 3
+    k_p = 25
+    k_d = 0.5
 
     prev_error = 0.0
     prev_t = time.time()
@@ -44,7 +44,7 @@ def main():
         u = k_p * error + k_d * d_error
 
         # saturate
-        u = max(min(u, 0.7), -0.7)
+        u = max(min(u, 0.7), -1)
         # apply
         print(u)
         left.power_command = -u
