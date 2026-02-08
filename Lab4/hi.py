@@ -17,8 +17,8 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 25
-    k_d = 0.5
+    k_p = 15
+    k_d = 0.23
 
     prev_error = 0.0
     prev_t = time.time()
@@ -36,15 +36,15 @@ def main():
         g_theta = imu.gravity_vector[1]   # tilt estimate
         # print("gtheta =" + f"{g_theta}")
 
-        # PD
-        error = -g_theta                  # target = 0
+        # PD -0.025
+        error = -0.024 -g_theta                  # target = 0
         d_error = (error - prev_error) / dt
         prev_error = error
 
         u = k_p * error + k_d * d_error
 
         # saturate
-        u = max(min(u, 0.7), -1)
+        u = max(min(u, 0.7), -0.7)
         # apply
         print(u)
         left.power_command = -u
