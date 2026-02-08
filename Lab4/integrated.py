@@ -33,7 +33,7 @@ def main():
     prev_t = time.time()
     start_pos = (left.position + right.position) / 2
     prev_pos = start_pos
-    target_theta = 0
+    theta_target = 0
     max_angle = 2
 
     while True:
@@ -51,7 +51,7 @@ def main():
         # print("gtheta =" + f"{g_theta}")
 
         # PD -0.025
-        error = target_theta - 0.024 - g_theta                  # target = 0
+        error = theta_target - 0.024 - g_theta                  # target = 0
         d_error = (error - prev_error) / dt
         prev_error = error
 
