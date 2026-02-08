@@ -17,8 +17,8 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 15
-    k_d = 5
+    k_p = 17
+    k_d = 3
 
     prev_error = 0.0
     prev_t = time.time()
@@ -45,14 +45,12 @@ def main():
 
         # saturate
         u = max(min(u, 0.7), -0.7)
-        if u < 0 and u != 0.7:
-            u *= back_bias
         # apply
         print(u)
         left.power_command = -u
         right.power_command = u
 
-        time.sleep(0.01)   # ~200 Hz
+        time.sleep(0.005)   # ~200 Hz
 
 if __name__ == "__main__":
     main()
