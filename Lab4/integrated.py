@@ -24,10 +24,10 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 7
-    k_d = 0.28
-    k_p_pos = 0.1
-    k_d_vel = 0.1
+    k_p = 8
+    k_d = 0.2
+    k_p_pos = 0.3
+    k_d_vel = 0.3
 
     prev_error = 0.0
     prev_t = time.time()
@@ -40,7 +40,6 @@ def main():
         # timing
         t = time.time()
         dt = t - prev_t
-        dt = 0.1
         prev_t = t
         if dt <= 0:
             continue
@@ -53,7 +52,7 @@ def main():
         # print("gtheta =" + f"{g_theta}")
 
         # PD -0.025
-        error = theta_target - 0.024 - g_theta                  # target = 0
+        error = theta_target - g_theta                  # target = 0
         d_error = (error - prev_error) / dt
         prev_error = error
 
@@ -66,7 +65,7 @@ def main():
         left.power_command = -u
         right.power_command = u
 
-        time.sleep(0.05)   # ~200 Hz
+        time.sleep(0.05)
 
 if __name__ == "__main__":
     main()
