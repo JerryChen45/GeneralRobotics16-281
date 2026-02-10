@@ -17,7 +17,7 @@ def main():
     # You can access them directly: plink.channel1
     # Or you can save references as local variables for convenience:
     left_motor = plink.channel1
-    right_motor = plink.channel2
+    right_motor = plink.channel4
 
     # Finally, connect to the MotorGo board and push the configuration
     plink.connect()
