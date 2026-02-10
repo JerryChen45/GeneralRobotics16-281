@@ -1,0 +1,87 @@
+import time
+import sys
+import board
+import adafruit_bh1750
+from motorgo import Plink, ControlMode
+
+LEFT_CH = 1
+RIGHT_CH = 3
+
+LEFT_DIR = 1.0
+RIGHT_DIR = -1.0   # flip if search turns wrong way
+
+DT = 0.03
+
+# ===== LUX CUTOFF =====
+BLACK_LUX_CUTOFF = 80.0
+
+# SEARCH behavior: slow right turn
+SEARCH_FWD = 0.06
+SEARCH_TURN = 0.16
+
+MIN_MOVE = 0.40
+MAX_MOVE = 0.50
+U_CLIP = 0.45
+
+def clip(x, lo, hi):
+    return lo if x < lo else hi if x > hi else x
+
+def apply_deadband(u, min_move, max_move):
+    if abs(u) < 1e-6:
+        return 0.0
+    sign = 1.0 if u > 0 else -1.0
+    mag = abs(u)
+    mag = clip(mag, 0.0, 1.0)
+    return sign * (min_move + (max_move - min_move) * mag)
+
+def set_motors(left_motor, right_motor, uL, uR):
+    uL = clip(uL, -U_CLIP, U_CLIP)
+    uR = clip(uR, -U_CLIP, U_CLIP)
+    cmdL = apply_deadband(uL, MIN_MOVE, MAX_MOVE) * LEFT_DIR
+    cmdR = apply_deadband(uR, MIN_MOVE, MAX_MOVE) * RIGHT_DIR
+    left_motor.power_command = cmdL
+    right_motor.power_command = cmdR
+    return cmdL, cmdR
+
+def main():
+    i2c = board.I2C()
+    light = adafruit_bh1750.BH1750(i2c)
+
+    p = Plink(frequency=200, timeout=1.0)
+    p.connect()
+
+    left = getattr(p, f"channel{LEFT_CH}")
+    right = getattr(p, f"channel{RIGHT_CH}")
+    left.control_mode = ControlMode.POWER
+    right.control_mode = ControlMode.POWER
+
+    print("\nSEARCH MODE (raw lux, no smoothing)")
+    print("Robot should turn RIGHT until lux < 80\n")
+
+    try:
+        while True:
+            lux = float(light.lux)
+
+            # SEARCH motion
+            uL = SEARCH_FWD + SEARCH_TURN
+            uR = SEARCH_FWD - SEARCH_TURN
+            cmdL, cmdR = set_motors(left, right, uL, uR)
+
+            # Debug
+            if lux < BLACK_LUX_CUTOFF:
+                print(f"lux={lux:6.1f}  BLACK DETECTED")
+            else:
+                print(f"lux={lux:6.1f}  white")
+
+            time.sleep(DT)
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        left.power_command = 0.0
+        right.power_command = 0.0
+        print("Stopped motors.")
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()

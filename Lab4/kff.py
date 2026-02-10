@@ -17,12 +17,10 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 4
-    k_d = 0.5
+    k_p = 2.5
+    k_d = 0.237
 
-    prev_error = 0.0
     prev_t = time.time()
-
 
     while True:
         # timing
@@ -33,26 +31,22 @@ def main():
             continue
 
         # sensor
-        g_theta = imu.gravity_vector[1]   # tilt estimate
-        # print("gtheta =" + f"{g_theta}")
+        g_theta = imu.gravity_vector[1]
+        omega = imu.gyro[1]  # angular velocity from gyro
 
-        # PD -0.025
-        error = -0.043 -g_theta 
-        print(error)                 # target = 0
-        d_error = (error - prev_error) / dt
-        prev_error = error
+        # PD with gyro derivative
+        error = -0.048 - g_theta
+        u = k_p * error - k_d * omega
 
-
-        u = k_p * error + k_d * d_error
+        print(u)
 
         # saturate
-        u = max(min(u, 0.6), -0.65)
-        # apply
-        # print(u)
+        u = max(min(u, 0.6), -0.6)
+
         left.power_command = -u
         right.power_command = u
 
-        time.sleep(0.05)   # ~200 Hz
+        time.sleep(0.005)
 
 if __name__ == "__main__":
     main()
