@@ -17,8 +17,8 @@ def main():
     left.control_mode = ControlMode.POWER
     right.control_mode = ControlMode.POWER
 
-    k_p = 18.5  #0.517
-    k_d = 0.001
+    k_p = 19.7 #0.517
+    k_d = 0.000
     prev_error = 0.0
     prev_t = time.time()
 
