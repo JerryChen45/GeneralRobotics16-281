@@ -9,7 +9,6 @@ import sys
 import math
 import numpy as np
 
-# Try importing matplotlib (only available on laptop, not robot)
 try:
     from map_grid import visualize_grid
     HAS_MATPLOTLIB = True
@@ -28,23 +27,22 @@ from path_follower import (
 Obstacles = Easy_Obstacles
 
 
+#start, goal, heading from user
 def get_user_input():
-    """Get start, goal, and heading from user at demo time."""
     print("=" * 50)
     print("  Lab 5 - Path Planning Demo")
     print("=" * 50)
 
-    sx = float(input("Start X (inches): "))
-    sy = float(input("Start Y (inches): "))
-    gx = float(input("Goal X (inches):  "))
-    gy = float(input("Goal Y (inches):  "))
+    start_x = float(input("Start X (inches): "))
+    start_y = float(input("Start Y (inches): "))
+    goal_x = float(input("Goal X (inches):  "))
+    goal_y = float(input("Goal Y (inches):  "))
     direction = input("Initial heading (N/E/S/W): ").strip().upper()
 
-    return (sx, sy), (gx, gy), direction
+    return (start_x, start_y), (goal_x, goal_y), direction
 
 
 def init_hardware():
-    """Initialize MotorGo Plink and return (left_motor, right_motor)."""
     from motorgo.plink import Plink, ControlMode
 
     plink = Plink()
