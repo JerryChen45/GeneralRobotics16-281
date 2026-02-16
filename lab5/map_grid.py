@@ -1,9 +1,12 @@
-# Map_grid is the first step in our pipeline. it converts the 
-# given obstacles into a grid representation, where each cell 
+# Map_grid is the first step in our pipeline. it converts the
+# given obstacles into a grid representation, where each cell
 # is marked as either free or occupied.
+
+#on robot: python3 main.py
+#on Laptop: python3 main.py --visualize --dry-run
 import numpy as np
 
-#matpolotlib isn't installed on the bot, but can show laptop to TA.
+# Matplotlib only needed for visualization (laptop only, not robot)
 try:
     import matplotlib.pyplot as plt
     HAS_MATPLOTLIB = True
@@ -30,11 +33,8 @@ Easy_Obstacles = [
 Hard_Obstacles = [
     (6, 10.5, 12, 16.5),         # 6x6
     (23, 19, 41, 25),            # 18x6
-    (33.5, 37.5, 46.5, 50.5),    # 14.33x4 @ 45°bruh
+    (33.5, 37.5, 46.5, 50.5),    # 14.33x4 @ 45°
     (38.25, 7.25, 49.75, 18.75), # 12.21x4 @ 45°
-    (43.75, 48, 61.75, 54),      # 18x6
-    (55.75, 21, 61.75, 27),      # 6x6
-    (52.75, 6, 61.75, 15),       # 9x9
 ]
 
 # Builds occupancy grid w/ C-space inflation
@@ -56,10 +56,10 @@ def build_occupancy_grid(obstacles, resolution, robot_radius):
     # c-space inflated grid
     inflated_grid = np.zeros((rows, cols), dtype=bool)
     for x_min, y_min, x_max, y_max in obstacles:
-        cx_min = x_min - robot_radius
-        cy_min = y_min - robot_radius
-        cx_max = x_max + robot_radius
-        cy_max = y_max + robot_radius
+        cx_min = x_min - robot_radius/2
+        cy_min = y_min - robot_radius/2
+        cx_max = x_max + robot_radius/2
+        cy_max = y_max + robot_radius/2
 
         # Convert to grid indices (clamp to map bounds)
         col_start = max(0, int(cx_min * resolution))
@@ -85,13 +85,13 @@ def grid_to_world(col, row, resolution):
 def world_to_grid(x, y, resolution):
     return int(x * resolution), int(y * resolution)
 
-def visualize_grid(inflated_grid, original_grid, resolution, path=None, start=None, goal=None):
+def visualize_grid(inflated_grid, original_grid, path=None, start=None, goal=None):
+    """
+    Visualize grid on LAPTOP ONLY (for TA demo).
+    Robot loads pre-computed waypoints instead of running this.
+    """
     if not HAS_MATPLOTLIB:
-        print("[SKIP] matplotlib not available — skipping visualization.")
-        if path:
-            print("Planned waypoints:")
-            for i, p in enumerate(path):
-                print(f"  {i}: ({p[0]:.1f}, {p[1]:.1f})")
+        print("ERROR: Matplotlib not installed. Cannot visualize grid.")
         return
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 7.5))
@@ -126,14 +126,14 @@ def visualize_grid(inflated_grid, original_grid, resolution, path=None, start=No
 
 
 if __name__ == '__main__':
-    # They will be at least 5 in from all obstacles
+    # They will be at least 5 inch from all obstacles
     # (including the walls). These coordinates will be with respect to a bottom-left origin.
 
     # Build grids: inflated (for path planning) and original (for visualization)
-    inflated_grid, original_grid = build_occupancy_grid(Easy_Obstacles, Resolution, Robot_Radius)
+    inflated_grid, original_grid = build_occupancy_grid(Hard_Obstacles, Resolution, Robot_Radius)
 
     print(f"Grid shape: {inflated_grid.shape} (rows x cols)")
     print(f"Blocked cells: {inflated_grid.sum()} / {inflated_grid.size} ({100*inflated_grid.sum()/inflated_grid.size:.1f}%)")
 
-    # Always visualize with color-coded c-space inflation
-    visualize_grid(inflated_grid, original_grid, Resolution)
+    # Visualize (laptop only - for TA demo)
+    visualize_grid(inflated_grid, original_grid)
