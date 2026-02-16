@@ -1,31 +1,31 @@
 """
-File:           main.py
-Description:    Lab 5 main script — ties together map, planner, and follower.
-                Run this at demo time.
-
 Usage:
-    python main.py
-    python main.py --dry-run    (test without hardware)
+    python main.py                        (on robot: plan + execute)
+    python main.py --visualize --dry-run  (on laptop: plan + show viz to TA)
+    python main.py --dry-run              (test without hardware)
 """
 
 import sys
 import math
 import numpy as np
-from map_grid import build_occupancy_grid, visualize_grid, EASY_OBSTACLES
+
+# Try importing matplotlib (only available on laptop, not robot)
+try:
+    from map_grid import visualize_grid
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+
+from map_grid import (
+    Easy_Obstacles, Hard_Obstacles,
+    Robot_Radius, Resolution
+)
 from path_planner import plan_path
 from path_follower import (
     execute_path, heading_from_cardinal, compute_commands, print_commands
 )
-
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-ROBOT_SIZE = 6            # robot width/length in inches — MEASURE YOUR ROBOT
-# C-space inflation radius — must be < ~3-4" so demo start/goal aren't blocked
-ROBOT_RADIUS = ROBOT_SIZE / 2  # 3" for a 6" robot
-RESOLUTION = 4            # grid cells per inch (increase for accuracy)
-OBSTACLES = EASY_OBSTACLES
+# Change to Hard_Obstacles for hard course
+Obstacles = Easy_Obstacles
 
 
 def get_user_input():
@@ -65,20 +65,23 @@ def init_hardware():
 
 def main():
     dry_run = '--dry-run' in sys.argv
+    visualize = '--visualize' in sys.argv
 
     start, goal, direction = get_user_input()
     heading = heading_from_cardinal(direction)
 
     print(f"\nStart: {start}, Goal: {goal}, Heading: {direction}")
-    print(f"Robot radius (c-space): {ROBOT_RADIUS:.1f} inches")
-    print(f"Grid resolution: {RESOLUTION} cells/inch")
+    print(f"Robot radius (c-space): {Robot_Radius:.1f} inches")
+    print(f"Grid resolution: {Resolution} cells/inch")
     print("\nPlanning path...")
 
-    waypoints, grid = plan_path(start, goal, RESOLUTION, ROBOT_RADIUS, OBSTACLES)
+    waypoints, grids = plan_path(start, goal, Resolution, Robot_Radius, Obstacles)
+    inflated_grid, original_grid = grids
 
     if waypoints is None:
         print("FAILED: No path found! Check start/goal positions.")
-        visualize_grid(grid, RESOLUTION, start=start, goal=goal)
+        if visualize and HAS_MATPLOTLIB:
+            visualize_grid(inflated_grid, original_grid, start=start, goal=goal)
         return
 
     print(f"Path found with {len(waypoints)} waypoints:")
@@ -90,8 +93,13 @@ def main():
     print_commands(commands)
 
     # Show the path to the TA (required before robot moves)
-    print("\n>>> Displaying path — show this to the TA <<<")
-    visualize_grid(grid, RESOLUTION, path=waypoints, start=start, goal=goal)
+    if visualize and HAS_MATPLOTLIB:
+        print("\n>>> Displaying path — show this to the TA <<<")
+        visualize_grid(inflated_grid, original_grid, path=waypoints, start=start, goal=goal)
+    elif visualize and not HAS_MATPLOTLIB:
+        print("\n[WARNING] Matplotlib not available — cannot visualize path")
+    else:
+        print("\n[Path computed — use --visualize on laptop to show TA]")
 
     # After TA approves, execute
     if dry_run:
