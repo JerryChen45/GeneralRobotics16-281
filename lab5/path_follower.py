@@ -31,8 +31,8 @@ RIGHT_ENC_SIGN = 1
 # ============================================================
 BASE_POWER = 0.5          # forward power (0 to 1) — tune for speed vs accuracy
 KP_STEERING = 0.01         # proportional gain for heading correction — tune this
-WAYPOINT_TOLERANCE = 2.0  # inches — how close before advancing to next waypoint
-GOAL_TOLERANCE = 1.5      # inches — how close to final goal before stopping
+WAYPOINT_TOLERANCE = 20  # inches — how close before advancing to next waypoint
+GOAL_TOLERANCE = 20      # inches — how close to final goal before stopping
 
 
 def normalize_angle(angle):
@@ -53,20 +53,20 @@ def heading_from_cardinal(direction):
     }
     return mapping.get(direction.upper(), 0.0)
 
+def f(s, v, omega):
+    return np.array([
+        v * math.cos(s[2]),
+        v * math.sin(s[2]),
+        omega
+    ])
 
 def rk4_step(state, v, omega, dt):
     """RK4 integration step for odometry (from Lab 3)."""
-    def f(s):
-        return np.array([
-            v * math.cos(s[2]),
-            v * math.sin(s[2]),
-            omega
-        ])
 
-    k1 = f(state)
-    k2 = f(state + 0.5 * dt * k1)
-    k3 = f(state + 0.5 * dt * k2)
-    k4 = f(state + dt * k3)
+    k1 = f(state, v, omega)
+    k2 = f(state + 0.5 * dt * k1, v, omega)
+    k3 = f(state + 0.5 * dt * k2, v, omega)
+    k4 = f(state + dt * k3, v, omega)
 
     state = state + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
     state[2] = normalize_angle(state[2])
@@ -81,16 +81,17 @@ def update_odometry(state, prev_left, prev_right, left_motor, right_motor):
     delta_left = LEFT_ENC_SIGN * (curr_left - prev_left)
     delta_right = RIGHT_ENC_SIGN * (curr_right - prev_right)
 
-    left_dist = (delta_left / TICKS_PER_REV) * (2 * math.pi * WHEEL_RADIUS)
-    right_dist = (delta_right / TICKS_PER_REV) * (2 * math.pi * WHEEL_RADIUS)
-
-    v_left = left_dist / DT
-    v_right = right_dist / DT
+    omega_left_clicks = delta_left / DT
+    omega_right_clicks = delta_right / DT
+    omega_left_wheel = (omega_left_clicks / TICKS_PER_REV) * (2 * math.pi)
+    omega_right_wheel = (omega_right_clicks / TICKS_PER_REV) * (2 * math.pi)
+    v_left = omega_left_wheel * WHEEL_RADIUS
+    v_right = omega_right_wheel * WHEEL_RADIUS
 
     v = 0.5 * (v_left + v_right)
     omega = (v_right - v_left) / WHEELBASE
-
     state = rk4_step(state, v, omega, DT)
+    
     return state, curr_left, curr_right
 
 
@@ -145,6 +146,7 @@ def execute_path(waypoints, start_heading, left_motor=None, right_motor=None,
     # Initialize encoder tracking
     prev_left = left_motor.position
     prev_right = right_motor.position
+    print(f"Initial encoders: L={prev_left:.2f}, R={prev_right:.2f}")
 
     wp_index = 1  # current target waypoint (skip start)
     start_time = time.time()
