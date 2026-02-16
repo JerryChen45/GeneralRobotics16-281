@@ -62,17 +62,6 @@ def astar(grid, start_grid, goal_grid):
 
 
 def smooth_path(path, grid):
-    """
-    Line-of-sight path smoothing. Remove intermediate waypoints
-    when a straight line between two points doesn't cross obstacles.
-
-    Args:
-        path: list of (col, row) grid cells
-        grid: 2D numpy bool array
-
-    Returns:
-        smoothed: list of (col, row) with unnecessary waypoints removed
-    """
     if not path or len(path) <= 2:
         return path
 
@@ -91,11 +80,8 @@ def smooth_path(path, grid):
 
     return smoothed
 
-
+#Bresenham
 def line_of_sight(grid, p1, p2):
-    """
-    Check if a straight line from p1 to p2 is collision-free using Bresenham's.
-    """
     c1, r1 = p1
     c2, r2 = p2
     dc = abs(c2 - c1)
@@ -122,20 +108,6 @@ def line_of_sight(grid, p1, p2):
 
 
 def plan_path(start_world, goal_world, resolution, robot_radius, obstacles=None):
-    """
-    Full pipeline: build grid, run A*, smooth, return world-coordinate waypoints.
-
-    Args:
-        start_world: (x, y) in inches
-        goal_world: (x, y) in inches
-        resolution: grid cells per inch
-        robot_radius: c-space inflation in inches
-        obstacles: list of (x_min, y_min, x_max, y_max); defaults to Easy_Obstacles
-
-    Returns:
-        waypoints: list of (x, y) in inches, or None if no path
-        grids: (inflated_grid, original_grid) tuple for visualization
-    """
     if obstacles is None:
         obstacles = Easy_Obstacles
 
