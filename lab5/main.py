@@ -50,8 +50,8 @@ def init_hardware():
     plink = Plink()
     plink.connect()
 
-    left_motor = plink.channel1
-    right_motor = plink.channel3
+    left_motor = plink.channel4
+    right_motor = plink.channel1
 
     left_motor.control_mode = ControlMode.POWER
     right_motor.control_mode = ControlMode.POWER

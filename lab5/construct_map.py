@@ -97,7 +97,7 @@ def construct_obstacles(isEasy):
     # construct obstacles
     # Remeber that points are (X, Y)
     
-    easyObstacles = [
+    hardObstacles = [
         Obstacle(
             Line((8, 12), (14, 12), "B"),
             Line((14, 12), (14, 18), "R"),
@@ -123,7 +123,7 @@ def construct_obstacles(isEasy):
             Line((38, 36 + 6), (38, 36), "L")
         )
     ]
-    hardObstacles = [
+    easyObstacles = [
         Obstacle(
             Line((44, 4), (44 + 18/math.sqrt(2), 4 + 18/math.sqrt(2)), "BR"),
             Line((44 + 18/math.sqrt(2), 4 + 18/math.sqrt(2)),

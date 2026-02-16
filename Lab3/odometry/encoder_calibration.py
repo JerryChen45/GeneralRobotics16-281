@@ -2,7 +2,7 @@ import time
 from motorgo.plink import Plink, ControlMode
 
 # ========== CONFIG ==========
-CHANNEL = 3         # CHANGE to 1 (left) or 3 (right)
+CHANNEL = 4         # CHANGE to 1 (left) or 3 (right)
 MOTOR_DIR = -1.0     # match physical motor direction
 POWER = 0.2          # set to 0.0 if spinning by hand
 # ============================

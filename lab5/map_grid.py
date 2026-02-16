@@ -4,6 +4,7 @@ Description:    Generates an occupancy grid with c-space inflation for Lab 5
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 try:
     import matplotlib.pyplot as plt
@@ -133,7 +134,7 @@ def visualize_grid(grid, resolution, path=None, start=None, goal=None):
 if __name__ == '__main__':
     # Robot c-space radius — half side length of robot
     # Must be < ~3-4" so demo start/goal positions aren't inside inflated obstacles
-    ROBOT_RADIUS = 3.0  # 3" for a 6" robot
+    ROBOT_RADIUS = 8.867  # 3" for a 6" robot
     RESOLUTION = 4  # 4 cells per inch
 
     grid = build_occupancy_grid(EASY_OBSTACLES, RESOLUTION, ROBOT_RADIUS)

@@ -12,9 +12,10 @@ import numpy as np
 # ============================================================
 # CONFIGURATION — from your Lab 3 code
 # ============================================================
-WHEEL_RADIUS = 0.85       # inches
-WHEELBASE = 7.6           # inches (distance between wheel centers)
-TICKS_PER_REV = 6.698
+WHEEL_RADIUS = 1.125
+       # inches
+WHEELBASE = 6.5           # inches (distance between wheel centers)
+TICKS_PER_REV = 6.4845
 DT = 0.01                 # odometry update interval (seconds)
 
 # Motor direction conventions (from Lab 3)
@@ -29,7 +30,7 @@ RIGHT_ENC_SIGN = 1
 # STEERING TUNING PARAMETERS
 # ============================================================
 BASE_POWER = 0.5          # forward power (0 to 1) — tune for speed vs accuracy
-KP_STEERING = 0.4         # proportional gain for heading correction — tune this
+KP_STEERING = 0.01         # proportional gain for heading correction — tune this
 WAYPOINT_TOLERANCE = 2.0  # inches — how close before advancing to next waypoint
 GOAL_TOLERANCE = 1.5      # inches — how close to final goal before stopping
 

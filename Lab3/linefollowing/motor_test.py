@@ -2,8 +2,8 @@ import time
 import sys
 from motorgo import Plink, ControlMode
 
-LEFT_CH = 3
-RIGHT_CH = 1
+LEFT_CH = 1
+RIGHT_CH = 4
 
 def clip(x, lo, hi):
     return lo if x < lo else hi if x > hi else x
