@@ -4,7 +4,6 @@ Description:    Generates an occupancy grid with c-space inflation for Lab 5
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 try:
     import matplotlib.pyplot as plt
