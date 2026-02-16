@@ -1,35 +1,21 @@
-"""
-File:           path_planner.py
-Description:    A* path planner on an occupancy grid + path smoothing for Lab 5
-"""
-
 import heapq
 import math
 import numpy as np
 from map_grid import (
     build_occupancy_grid, world_to_grid, grid_to_world,
-    visualize_grid, EASY_OBSTACLES, MAP_WIDTH, MAP_HEIGHT
+    visualize_grid, Easy_Obstacles, Robot_Radius, Resolution,
+    Map_Width, Map_Height
 )
 
-
 def astar(grid, start_grid, goal_grid):
-    """
-    A* search on a 2D boolean occupancy grid.
-
-    Args:
-        grid: 2D numpy bool array (True = blocked)
-        start_grid: (col, row) start cell
-        goal_grid: (col, row) goal cell
-
-    Returns:
-        path: list of (col, row) grid cells from start to goal, or None if no path
-    """
+    
     rows, cols = grid.shape
     sc, sr = start_grid
     gc, gr = goal_grid
 
+    # edge caes if its tight but not impossible: warn but proceed
     if grid[sr, sc] or grid[gr, gc]:
-        print("ERROR: Start or goal is inside an obstacle!")
+        print("ERROR: Start or goal is in c-space - try reducing Robot_Radius or adjust position")
         return None
 
     # 8-connected neighbors (col_offset, row_offset, cost)
@@ -144,25 +130,59 @@ def plan_path(start_world, goal_world, resolution, robot_radius, obstacles=None)
         goal_world: (x, y) in inches
         resolution: grid cells per inch
         robot_radius: c-space inflation in inches
-        obstacles: list of (x_min, y_min, x_max, y_max); defaults to EASY_OBSTACLES
+        obstacles: list of (x_min, y_min, x_max, y_max); defaults to Easy_Obstacles
 
     Returns:
         waypoints: list of (x, y) in inches, or None if no path
-        grid: the occupancy grid (for visualization)
+        grids: (inflated_grid, original_grid) tuple for visualization
     """
     if obstacles is None:
-        obstacles = EASY_OBSTACLES
+        obstacles = Easy_Obstacles
 
-    grid = build_occupancy_grid(obstacles, resolution, robot_radius)
+    inflated_grid, original_grid = build_occupancy_grid(obstacles, resolution, robot_radius)
 
-    start_grid = world_to_grid(start_world[0], start_world[1], resolution)
-    goal_grid = world_to_grid(goal_world[0], goal_world[1], resolution)
+    # Validate that start and goal are within map bounds
+    sx, sy = start_world
+    gx, gy = goal_world
 
-    raw_path = astar(grid, start_grid, goal_grid)
+    if not (0 <= sx < Map_Width and 0 <= sy < Map_Height):
+        print(f"ERROR: Start position ({sx}, {sy}) is outside map bounds!")
+        print(f"Map size: {Map_Width}\" × {Map_Height}\" (0,0 to {Map_Width},{Map_Height})")
+        return None, (inflated_grid, original_grid)
+
+    if not (0 <= gx < Map_Width and 0 <= gy < Map_Height):
+        print(f"ERROR: Goal position ({gx}, {gy}) is outside map bounds!")
+        print(f"Map size: {Map_Width}\" × {Map_Height}\" (0,0 to {Map_Width},{Map_Height})")
+        return None, (inflated_grid, original_grid)
+
+    start_grid = world_to_grid(sx, sy, resolution)
+    goal_grid = world_to_grid(gx, gy, resolution)
+
+    # Smart validation: distinguish between c-space and real obstacle collisions
+    sc, sr = start_grid
+    gc, gr = goal_grid
+
+    # Check if start is in a REAL obstacle (hard error)
+    if original_grid[sr, sc]:
+        print(f"ERROR: Start position {start_world} is inside a real obstacle!")
+        return None, (inflated_grid, original_grid)
+
+    # Check if goal is in a REAL obstacle (hard error)
+    if original_grid[gr, gc]:
+        print(f"ERROR: Goal position {goal_world} is inside a real obstacle!")
+        return None, (inflated_grid, original_grid)
+
+    # Check if start/goal is in c-space but not real obstacle (warning, but proceed)
+    if inflated_grid[sr, sc]:
+        print(f"WARNING: Start {start_world} is in c-space inflation zone - path may be tight!")
+    if inflated_grid[gr, gc]:
+        print(f"WARNING: Goal {goal_world} is in c-space inflation zone - path may be tight!")
+
+    raw_path = astar(inflated_grid, start_grid, goal_grid)
     if raw_path is None:
-        return None, grid
+        return None, (inflated_grid, original_grid)
 
-    smoothed = smooth_path(raw_path, grid)
+    smoothed = smooth_path(raw_path, inflated_grid)
 
     # Convert back to world coordinates
     waypoints = [grid_to_world(c, r, resolution) for c, r in smoothed]
@@ -171,7 +191,7 @@ def plan_path(start_world, goal_world, resolution, robot_radius, obstacles=None)
     # can make gentle corrections instead of one long blind segment
     waypoints = subdivide_long_segments(waypoints, max_segment_inches=8.0)
 
-    return waypoints, grid
+    return waypoints, (inflated_grid, original_grid)
 
 
 def subdivide_long_segments(waypoints, max_segment_inches=8.0):
@@ -197,20 +217,21 @@ def subdivide_long_segments(waypoints, max_segment_inches=8.0):
 
 
 if __name__ == '__main__':
-    ROBOT_RADIUS = 3.0
-    RESOLUTION = 4
-
+    # Test path planning with values from map_grid.py
     start = (40, 32)
     goal = (16, 8)
 
     print(f"Planning path from {start} to {goal}...")
-    waypoints, grid = plan_path(start, goal, RESOLUTION, ROBOT_RADIUS)
+    print(f"Using Robot_Radius={Robot_Radius}, Resolution={Resolution}")
+
+    waypoints, grids = plan_path(start, goal, Resolution, Robot_Radius)
+    inflated_grid, original_grid = grids
 
     if waypoints:
         print(f"Path found with {len(waypoints)} waypoints:")
         for i, wp in enumerate(waypoints):
             print(f"  {i}: ({wp[0]:.1f}, {wp[1]:.1f})")
-        visualize_grid(grid, RESOLUTION, path=waypoints, start=start, goal=goal)
+        visualize_grid(inflated_grid, original_grid, path=waypoints, start=start, goal=goal)
     else:
         print("No path found!")
-        visualize_grid(grid, RESOLUTION, start=start, goal=goal)
+        visualize_grid(inflated_grid, original_grid, start=start, goal=goal)
