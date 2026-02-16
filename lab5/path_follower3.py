@@ -12,8 +12,7 @@ import numpy as np
 # ============================================================
 # CONFIGURATION — from your Lab 3 code
 # ============================================================
-WHEEL_RADIUS = 1.125
-       # inches
+WHEEL_RADIUS = 1.125       # inches
 WHEELBASE = 6.5           # inches (distance between wheel centers)
 TICKS_PER_REV = 6.4845
 DT = 0.01                 # odometry update interval (seconds)
@@ -24,15 +23,15 @@ RIGHT_MOTOR_DIR = 1
 
 # Encoder sign conventions (from Lab 3)
 LEFT_ENC_SIGN = 1
-RIGHT_ENC_SIGN = 1
+RIGHT_ENC_SIGN = -1
 
 # ============================================================
 # STEERING TUNING PARAMETERS
 # ============================================================
 BASE_POWER = 0.5          # forward power (0 to 1) — tune for speed vs accuracy
-KP_STEERING = 0.01         # proportional gain for heading correction — tune this
-WAYPOINT_TOLERANCE = 20  # inches — how close before advancing to next waypoint
-GOAL_TOLERANCE = 20      # inches — how close to final goal before stopping
+KP_STEERING = 5         # proportional gain for heading correction — tune this
+WAYPOINT_TOLERANCE = 1  # inches — how close before advancing to next waypoint
+GOAL_TOLERANCE = 1      # inches — how close to final goal before stopping
 
 
 def normalize_angle(angle):
@@ -79,6 +78,7 @@ def update_odometry(state, prev_left, prev_right, left_motor, right_motor):
 
     delta_left = LEFT_ENC_SIGN * (curr_left - prev_left)
     delta_right = RIGHT_ENC_SIGN * (curr_right - prev_right)
+    print(f"Encoders: L={curr_left:.2f} (Δ={delta_left:.2f}), R={curr_right:.2f} (Δ={delta_right:.2f})")
 
     omega_left_clicks = delta_left / DT
     omega_right_clicks = delta_right / DT
@@ -241,14 +241,48 @@ def print_commands(commands):
 
 
 if __name__ == '__main__':
-    # Dry-run test with example waypoints
-    test_waypoints = [(40, 32), (30, 20), (20, 10), (16, 8)]
+    import sys
+    
+    # Check if dry-run mode
+    dry_run = '--dry-run' in sys.argv
+    
+    # Test waypoints
+    test_waypoints = [(0,0), (9,1), (10,5)]
     start_dir = 'N'
-
+    
     heading = heading_from_cardinal(start_dir)
     print(f"Start heading: {start_dir} ({math.degrees(heading):.0f} deg)")
-
+    
     commands = compute_commands(test_waypoints, heading)
     print_commands(commands)
-
-    execute_path(test_waypoints, heading, dry_run=True)
+    
+    if dry_run:
+        # Dry run - no motors
+        execute_path(test_waypoints, heading, dry_run=True)
+    else:
+        # Real execution - initialize hardware
+        print("\n*** REAL EXECUTION MODE ***")
+        proceed = input("Initialize motors and run? (y/n): ").strip().lower()
+        
+        if proceed == 'y':
+            from motorgo.plink import Plink, ControlMode
+            
+            # Initialize hardware
+            plink = Plink()
+            plink.connect()
+            
+            left_motor = plink.channel1
+            right_motor = plink.channel4
+            
+            left_motor.control_mode = ControlMode.POWER
+            right_motor.control_mode = ControlMode.POWER
+            
+            left_motor.power_command = 0
+            right_motor.power_command = 0
+            
+            print("Hardware initialized!")
+            
+            # Execute path
+            execute_path(test_waypoints, heading, left_motor, right_motor, dry_run=False)
+        else:
+            print("Cancelled.")

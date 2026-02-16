@@ -8,7 +8,7 @@ plink = Plink()
 plink.connect()
 
 left_motor = plink.channel1
-right_motor = plink.channel3
+right_motor = plink.channel4
 
 left_motor.control_mode = ControlMode.POWER
 right_motor.control_mode = ControlMode.POWER
@@ -36,9 +36,9 @@ RIGHT_ENC_SIGN = 1     # right encoder decreases forward
 # ========== THREE MOTOR PAIRS ==========
 # Format: (left_power, right_power)
 MOTOR_PAIRS = [
-    (-0.9, -0.72),
-    (0.63, -0.4),
-    (-0.55, 0.-7)
+    (1, 1),
+    (1, 1),
+    (1, 1)
 ]
 # ======================================
 
