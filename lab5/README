@@ -1,0 +1,94 @@
+# Lab 5 — Path Planning & Following
+
+## Usage
+
+```bash
+# On robot: plan + execute
+python3 main.py
+
+# On laptop: plan + show visualization to TA
+python3 main.py --visualize --dry-run
+
+# Test without hardware
+python3 main.py --dry-run
+```
+
+---
+
+## Pipeline Overview
+
+```
+User Input (start, goal, heading)
+        │
+        ▼
+map_grid.py — build_occupancy_grid()
+  • Discretizes the 72"×54" arena at 4 cells/inch → 288×216 grid
+  • Marks raw obstacle rectangles as blocked (original_grid)
+  • Inflates each obstacle + walls by Robot_Radius (5") → C-space (inflated_grid)
+  • C-space ensures the robot center never gets within collision distance
+        │
+        ▼
+path_planner.py — astar(inflated_grid, start_grid, goal_grid)
+  • Converts world coords (inches) → grid indices via world_to_grid()
+  • Validates start/goal: hard error if inside a real obstacle,
+    warning only if in the inflation zone (still passable)
+  • Runs A* on inflated_grid with Euclidean heuristic
+  • Returns raw grid-cell path (many small steps along grid lines)
+        │
+        ▼
+path_planner.py — smooth_path()
+  • Greedy line-of-sight pruning: from the current point, find the
+    farthest future point reachable in a straight line with no obstacles
+  • Uses Bresenham's line algorithm (line_of_sight()) to check each candidate
+  • Reduces hundreds of grid steps to a small set of waypoints at obstacle corners
+        │
+        ▼
+path_planner.py — subdivide_long_segments()
+  • Splits any segment longer than 8" into equal sub-segments
+  • Reason: proportional steering corrects heading error only at each
+    waypoint — long open segments give no intermediate feedback,
+    so the robot can drift significantly before correcting
+        │
+        ▼
+path_follower4.py — execute_path()
+  • RK4 odometry tracks (x, y, θ) from encoder ticks
+  • For each waypoint: compute heading error → proportional steering
+    correction → differential wheel power → drive until within tolerance
+```
+
+---
+
+## Why A*?
+
+A* was chosen over the other common options:
+
+- **Dijkstra** — explores in all directions equally. Finds the optimal path but wastes time expanding cells moving away from the goal. On a 288×216 grid (~62k cells) this is noticeably slower.
+- **BFS** — works on unweighted graphs only. Doesn't handle diagonal moves with √2 cost correctly.
+- **RRT** — better for high-dimensional or continuous spaces with complex dynamics. For a flat 2D grid with known obstacles it's overkill and produces jagged, non-optimal paths.
+- **A*** — combines Dijkstra's optimality guarantee with a heuristic (Euclidean distance to goal) that biases the search toward the goal. Expands far fewer cells in practice. The Euclidean heuristic is admissible (never overestimates), so the returned path is still optimal.
+
+We use an **8-connected** neighbor grid (cardinal + diagonal, diagonal cost = √2) so the robot can route naturally around corners without staircase artifacts.
+
+---
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| A* with Euclidean heuristic | Optimal + fast on bounded 2D grid |
+| 4 cells/inch resolution | Fine enough to route around 6" obstacles, coarse enough to run fast |
+| C-space inflation (Robot_Radius = 5") | Treats robot as a point in inflated space — guarantees collision-safe paths |
+| Greedy visibility smoothing (Bresenham) | Turns grid staircase into straight-line segments the robot can actually drive |
+| Segment subdivision at 8" | Gives proportional steering frequent correction opportunities on long open runs |
+| Soft warning for C-space start/goal | Real-world placement is imprecise; hard-failing on a 1-cell overshoot is too strict |
+
+---
+
+## File Structure
+
+| File | Role |
+|---|---|
+| `main.py` | Entry point — user input, hardware init, orchestrates planning + execution |
+| `map_grid.py` | Builds occupancy grid, defines obstacles, handles coordinate conversions |
+| `path_planner.py` | A* search, path smoothing, segment subdivision |
+| `path_follower4.py` | Proportional steering follower with RK4 odometry |
