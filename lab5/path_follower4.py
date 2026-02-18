@@ -12,28 +12,27 @@ import numpy as np
 # ============================================================
 # CONFIGURATION — from your Lab 3 code
 # ============================================================
-WHEEL_RADIUS = 1.125       # inches
-WHEELBASE = 6.25           # inches (distance between wheel centers)
+WHEEL_RADIUS = 1.125
+       # inches
+WHEELBASE = 6.5           # inches (distance between wheel centers)
 TICKS_PER_REV = 6.4845
 DT = 0.01                 # odometry update interval (seconds)
 
 # Motor direction conventions (from Lab 3)
-LEFT_MOTOR_DIR = 1       # left motor physically flipped
-RIGHT_MOTOR_DIR = -1
+LEFT_MOTOR_DIR = -1       # left motor physically flipped
+RIGHT_MOTOR_DIR = 1
 
 # Encoder sign conventions (from Lab 3)
-LEFT_ENC_SIGN = -1
-RIGHT_ENC_SIGN = 1
+LEFT_ENC_SIGN = 1
+RIGHT_ENC_SIGN = -1
 
 # ============================================================
 # STEERING TUNING PARAMETERS
 # ============================================================
 BASE_POWER = 0.5          # forward power (0 to 1) — tune for speed vs accuracy
-KP_STEERING = 30       # proportional gain for heading correction — tune this
-WAYPOINT_TOLERANCE = 2  # inches — how close before advancing to next waypoint
-GOAL_TOLERANCE = 2     # inches — how close to final goal before stopping
-
-KD_STEERING = 0.006
+KP_STEERING = 0.01         # proportional gain for heading correction — tune this
+WAYPOINT_TOLERANCE = 20  # inches — how close before advancing to next waypoint
+GOAL_TOLERANCE = 20      # inches — how close to final goal before stopping
 
 
 def normalize_angle(angle):
@@ -78,9 +77,8 @@ def update_odometry(state, prev_left, prev_right, left_motor, right_motor):
     curr_left = left_motor.position
     curr_right = right_motor.position
 
-    delta_left = LEFT_ENC_SIGN * (curr_left - prev_left)
-    delta_right = RIGHT_ENC_SIGN * (curr_right - prev_right)
-    print(f"Encoders: L={curr_left:.2f} (Δ={delta_left:.2f}), R={curr_right:.2f} (Δ={delta_right:.2f})")
+    delta_left = curr_left - prev_left
+    delta_right = curr_right - prev_right
 
     omega_left_clicks = delta_left / DT
     omega_right_clicks = delta_right / DT
@@ -148,11 +146,7 @@ def execute_path(waypoints, start_heading, left_motor=None, right_motor=None,
     # Initialize encoder tracking
     prev_left = left_motor.position
     prev_right = right_motor.position
-    time.sleep(1)
     print(f"Initial encoders: L={prev_left:.2f}, R={prev_right:.2f}")
-    prev_left = left_motor.position
-    prev_right = right_motor.position
-    prev_heading_error = 0.0
 
     wp_index = 1  # current target waypoint (skip start)
     start_time = time.time()
@@ -175,13 +169,11 @@ def execute_path(waypoints, start_heading, left_motor=None, right_motor=None,
             # Compute heading error
             desired_heading = heading_to(state, target)
             heading_error = normalize_angle(desired_heading - state[2])
-            print(f"  HDG={math.degrees(state[2]):.1f}° desired={math.degrees(desired_heading):.1f}° err={math.degrees(heading_error):.1f}°")
 
             # Proportional steering: adjust wheel powers
-            steering = KP_STEERING * heading_error + KD_STEERING * (heading_error - prev_heading_error) / DT
-            prev_heading_error = heading_error
-            left_power = BASE_POWER - 1 * steering if steering > 0 else BASE_POWER - steering
-            right_power = BASE_POWER + 1 * steering if steering < 0 else BASE_POWER + steering
+            steering = KP_STEERING * heading_error
+            left_power = BASE_POWER - steering
+            right_power = BASE_POWER + steering
 
             # Clamp powers to [-1, 1]
             left_power = max(-1.0, min(1.0, left_power))
@@ -196,6 +188,7 @@ def execute_path(waypoints, start_heading, left_motor=None, right_motor=None,
             state, prev_left, prev_right = update_odometry(
                 state, prev_left, prev_right, left_motor, right_motor
             )
+
 
         # Stop motors
         left_motor.power_command = 0
@@ -214,7 +207,6 @@ def execute_path(waypoints, start_heading, left_motor=None, right_motor=None,
         right_motor.power_command = 0
         print("\nStopped by user!")
         print(f"  Position at stop: ({state[0]:.2f}, {state[1]:.2f})")
-
 
 def compute_commands(waypoints, start_heading):
     """
@@ -248,51 +240,16 @@ def print_commands(commands):
     print(f"Number of segments: {len(commands)}")
 
 
-if __name__ == '__main__':
-    import sys
-    
-    # Check if dry-run mode
-    dry_run = '--dry-run' in sys.argv
-    
-    # Test waypoints
-    test_waypoints = [(66.0, 6.0) , (59.375, 10.416666666666666) , (52.75, 14.833333333333332) , (46.125, 19.25) , (39.5, 23.666666666666664) , (32.875, 28.083333333333336) , (26.25, 32.5) , (19.833333333333336, 33.333333333333336) , (13.416666666666668, 34.166666666666664) , (7.0, 35.0)]
-    # test_waypoints = [(y, -x) for x, y in test_waypoints]
-    start_dir = 'N'
-    
-    heading = heading_from_cardinal(start_dir)
 
+if __name__ == '__main__':
+    # Dry-run test with example waypoints
+    test_waypoints = [(40, 32), (30, 20), (20, 10), (16, 8)]
+    start_dir = 'N'
+
+    heading = heading_from_cardinal(start_dir)
     print(f"Start heading: {start_dir} ({math.degrees(heading):.0f} deg)")
-    
+
     commands = compute_commands(test_waypoints, heading)
     print_commands(commands)
-    
-    if dry_run:
-        # Dry run - no motors
-        execute_path(test_waypoints, heading, dry_run=True)
-    else:
-        # Real execution - initialize hardware
-        print("\n*** REAL EXECUTION MODE ***")
-        proceed = input("Initialize motors and run? (y/n): ").strip().lower()
-        
-        if proceed == 'y':
-            from motorgo.plink import Plink, ControlMode
-            
-            # Initialize hardware
-            plink = Plink()
-            plink.connect()
-            
-            left_motor = plink.channel1
-            right_motor = plink.channel4
-            
-            left_motor.control_mode = ControlMode.POWER
-            right_motor.control_mode = ControlMode.POWER
-            
-            left_motor.power_command = 0
-            right_motor.power_command = 0
-            
-            print("Hardware initialized!")
-            
-            # Execute path
-            execute_path(test_waypoints, heading, left_motor, right_motor, dry_run=False)
-        else:
-            print("Cancelled.")
+
+    execute_path(test_waypoints, heading, dry_run=True)

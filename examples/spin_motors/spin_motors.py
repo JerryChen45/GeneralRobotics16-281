@@ -41,14 +41,14 @@ def main():
 
         # Set motor powers
         # Set the power command in the range [-1, 1]
-        left_motor.power_command = -1
+        left_motor.power_command = 1
 
         # Set the velocity command in rad/s
-        right_motor.velocity_command = 1
+        right_motor.velocity_command = -1
 
         # Set the power command in the range [-1, 1]
-        plink.channel3.power_command = 1
-        plink.channel4.power_command = 1
+        plink.channel1.power_command = 1
+        plink.channel4.power_command = -1
 
         # You can read the position and velocity of the motor channels from the encoders
         print("----")

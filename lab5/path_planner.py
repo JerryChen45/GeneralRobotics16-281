@@ -190,8 +190,8 @@ def subdivide_long_segments(waypoints, max_segment_inches=8.0):
 
 if __name__ == '__main__':
     # Test path planning with values from map_grid.py
-    start = (40, 32)
-    goal = (16, 8)
+    start = (66, 6)
+    goal = (7, 35)
 
     print(f"Planning path from {start} to {goal}...")
     print(f"Using Robot_Radius={Robot_Radius}, Resolution={Resolution}")
@@ -207,3 +207,6 @@ if __name__ == '__main__':
     else:
         print("No path found!")
         visualize_grid(inflated_grid, original_grid, start=start, goal=goal)
+
+    for i,wp in enumerate(waypoints):
+        print((wp[0], wp[1]),",", end=" ")
