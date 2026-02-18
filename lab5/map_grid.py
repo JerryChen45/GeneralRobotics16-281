@@ -18,7 +18,7 @@ Map_Width = 72
 Map_Height = 54
 
 #robot 
-Robot_Radius = 5.9
+Robot_Radius = 5
 Resolution = 4  # per inch
 
 # Easy course obstacles as (x_min, y_min, x_max, y_max)
