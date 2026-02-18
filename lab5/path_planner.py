@@ -190,8 +190,8 @@ def subdivide_long_segments(waypoints, max_segment_inches=8.0):
 
 if __name__ == '__main__':
     # Test path planning with values from map_grid.py
-    start = (66, 6)
-    goal = (7, 35)
+    start = (10, 25)
+    goal = (62, 45)
 
     print(f"Planning path from {start} to {goal}...")
     print(f"Using Robot_Radius={Robot_Radius}, Resolution={Resolution}")

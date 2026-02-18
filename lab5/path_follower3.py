@@ -29,9 +29,9 @@ RIGHT_ENC_SIGN = 1
 # STEERING TUNING PARAMETERS
 # ============================================================
 BASE_POWER = 0.5          # forward power (0 to 1) — tune for speed vs accuracy
-KP_STEERING = 30       # proportional gain for heading correction — tune this
-WAYPOINT_TOLERANCE = 2  # inches — how close before advancing to next waypoint
-GOAL_TOLERANCE = 2     # inches — how close to final goal before stopping
+KP_STEERING = 7      # proportional gain for heading correction — tune this
+WAYPOINT_TOLERANCE = 1  # inches — how close before advancing to next waypoint
+GOAL_TOLERANCE = 1     # inches — how close to final goal before stopping
 
 KD_STEERING = 0.006
 
@@ -255,9 +255,9 @@ if __name__ == '__main__':
     dry_run = '--dry-run' in sys.argv
     
     # Test waypoints
-    test_waypoints = [(66.0, 6.0) , (59.375, 10.416666666666666) , (52.75, 14.833333333333332) , (46.125, 19.25) , (39.5, 23.666666666666664) , (32.875, 28.083333333333336) , (26.25, 32.5) , (19.833333333333336, 33.333333333333336) , (13.416666666666668, 34.166666666666664) , (7.0, 35.0)]
+    test_waypoints = [(10.0, 25.0) , (10.875, 30.25) , (11.75, 35.5) , (12.0, 35.75) , (19.75, 36.75) , (27.5, 37.75) , (29.625, 41.875) , (31.75, 46.0) , (31.75, 47.5) , (32.0, 47.75) , (39.375, 47.75) , (46.75, 47.75) , (54.125, 47.75) , (61.5, 47.75) , (61.75, 47.5) , (62.0, 45.0)]
     # test_waypoints = [(y, -x) for x, y in test_waypoints]
-    start_dir = 'N'
+    start_dir = 'S'
     
     heading = heading_from_cardinal(start_dir)
 

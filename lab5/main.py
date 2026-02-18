@@ -1,7 +1,7 @@
 """
 Usage:
     python main.py                        (on robot: plan + execute)
-    python3 main.py --visualize --dry-run  (on laptop: plan + show viz to TA)
+    python main.py --visualize --dry-run  (on laptop: plan + show viz to TA)
     python main.py --dry-run              (test without hardware)
 """
 
@@ -20,7 +20,7 @@ from map_grid import (
     Robot_Radius, Resolution
 )
 from path_planner import plan_path
-from path_follower3 import (
+from path_follower import (
     execute_path, heading_from_cardinal, compute_commands, print_commands
 )
 # Change to Hard_Obstacles for hard course

@@ -18,7 +18,7 @@ Map_Width = 72
 Map_Height = 54
 
 #robot 
-Robot_Radius = 5
+Robot_Radius = 5.9
 Resolution = 4  # per inch
 
 # Easy course obstacles as (x_min, y_min, x_max, y_max)
@@ -56,10 +56,10 @@ def build_occupancy_grid(obstacles, resolution, robot_radius):
     # c-space inflated grid
     inflated_grid = np.zeros((rows, cols), dtype=bool)
     for x_min, y_min, x_max, y_max in obstacles:
-        cx_min = x_min - robot_radius/2
-        cy_min = y_min - robot_radius/2
-        cx_max = x_max + robot_radius/2
-        cy_max = y_max + robot_radius/2
+        cx_min = x_min - robot_radius
+        cy_min = y_min - robot_radius
+        cx_max = x_max + robot_radius
+        cy_max = y_max + robot_radius
 
         # Convert to grid indices (clamp to map bounds)
         col_start = max(0, int(cx_min * resolution))
