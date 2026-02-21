@@ -6,13 +6,15 @@ from motorgo import Plink, ControlMode
 
 left_ch = 1
 right_ch = 4
+right_motor = -1
+left_motor = 1
 
 base_power = 0.5
 
-target_lux = 60
-kp = 0.4
-kd = 0.1
-dt = 0.01
+target_lux = 85
+kp = 0.08
+kd = 0.009
+dt = 0.1
 
 
 def main():
@@ -42,16 +44,21 @@ def main():
 
         while True:
             lux = float(light.lux)
+            print("%.2f Lux" % light.lux)
             error = lux - target_lux
-            steer = kp * error + kd * (error - prev_error) / dt
-            right_pwr = base_power + steer
-            left_pwr = base_power - steer
+            capped_error = max(-10, min(10, error))
+            steer = kp * capped_error + kd * (capped_error - prev_error) / dt
+            right_pwr = base_power - steer
+            left_pwr = base_power + steer
 
-            right.power_command = max(-1.0, min(1.0, right_pwr))
-            left.power_command = max(-1.0, min(1.0, left_pwr))
+            right.power_command = right_motor * max(-1.0, min(1.0, right_pwr))
+            left.power_command = left_motor * max(-1.0, min(1.0, left_pwr))
 
-            prev_error = error
+            prev_error = capped_error
 
             time.sleep(dt)
     except:
         print("Sensor Not working!!")
+
+if __name__ == "__main__":
+    main()
