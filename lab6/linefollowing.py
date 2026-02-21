@@ -47,9 +47,6 @@ def main():
             right_pwr = base_power + steer
             left_pwr = base_power - steer
 
-            right.power_command = right_pwr
-            left.power_command = left_pwr
-
             right.power_command = max(-1.0, min(1.0, right_pwr))
             left.power_command = max(-1.0, min(1.0, left_pwr))
 
