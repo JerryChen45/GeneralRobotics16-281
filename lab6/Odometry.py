@@ -52,5 +52,6 @@ def update_odometry(state, prev_left, prev_right, left_motor, right_motor):
     # Accumulate heading change for sector tracking
     delta_theta = (dist_right - dist_left) / WHEELBASE
     accumulated_angle += delta_theta
+    time.sleep(0.2)
 
     return state, curr_left, curr_right, (accumulated_angle % 360)
