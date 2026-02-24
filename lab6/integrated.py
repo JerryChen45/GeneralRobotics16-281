@@ -37,8 +37,8 @@ RIGHT_CH   = 4
 RIGHT_DIR  = -1
 LEFT_DIR   = 1
 BASE_POWER = 0.5
-TARGET_LUX = 105.0
-KP         = 0.03
+TARGET_LUX = 110.0
+KP         = 0.02
 KD         = 0.006
 FOLLOW_DT  = 0.1
 
@@ -296,6 +296,6 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
 
 
 if __name__ == "__main__":
-    MAP  = [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+    MAP  = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     GOAL = 5
     localize_and_navigate(MAP, GOAL)

@@ -12,7 +12,7 @@ left_motor = 1
 base_power = 0.5
 
 target_lux = 105
-kp = 0.02
+kp = 0.03
 kd = 0.006
 dt = 0.1
 
