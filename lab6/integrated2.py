@@ -15,14 +15,14 @@ from motorgo import Plink, ControlMode
 NUM_SECTORS      = 16
 SECTOR_ANGLE_RAD = 2 * math.pi / NUM_SECTORS
 
-BLOCK_THRESHOLD_CM = 45.0
+BLOCK_THRESHOLD_CM = 35.0
 P_HIT              = 0.75
 P_MISS             = 1 - P_HIT
 
 NUM_PARTICLES    = 500
 MOTION_NOISE_STD = 0.3
 
-CONFIDENCE_THRESHOLD = 0.75
+CONFIDENCE_THRESHOLD = 0.5
 TIME_LIMIT_S         = 65
 
 WHEEL_RADIUS   = 1.125
@@ -37,7 +37,7 @@ RIGHT_CH   = 4
 RIGHT_DIR  = -1
 LEFT_DIR   = 1
 BASE_POWER = 0.5
-TARGET_LUX = 110.0
+TARGET_LUX = 106.0
 KP         = 0.02
 KD         = 0.006
 FOLLOW_DT  = 0.1
@@ -296,6 +296,6 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
 
 
 if __name__ == "__main__":
-    MAP  = [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    MAP  = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0]
     GOAL = 5
     localize_and_navigate(MAP, GOAL)
