@@ -19,10 +19,10 @@ BLOCK_THRESHOLD_CM = 35.0
 P_HIT              = 0.75
 P_MISS             = 1 - P_HIT
 
-NUM_PARTICLES    = 500
+NUM_PARTICLES    = 3200
 MOTION_NOISE_STD = 0.3
 
-CONFIDENCE_THRESHOLD = 0.5
+CONFIDENCE_THRESHOLD = 0.6
 TIME_LIMIT_S         = 65
 
 WHEEL_RADIUS   = 1.125
@@ -37,9 +37,9 @@ RIGHT_CH   = 4
 RIGHT_DIR  = -1
 LEFT_DIR   = 1
 BASE_POWER = 0.5
-TARGET_LUX = 106.0
-KP         = 0.02
-KD         = 0.006
+TARGET_LUX = 108.5
+KP         = 0.033
+KD         = 0.0063
 FOLLOW_DT  = 0.1
 SECTOR_DIST = 5.5
 
@@ -214,16 +214,25 @@ def print_status(particles, label=""):
 def drive_n_sectors(left, right, light, n):
     prev_error = 0.0
     state = np.array([0.0, 0.0, 0.0])
-    for _ in range(n):
-        prev_l = left.position
-        prev_r = right.position
-        acc_dist = 0.0
-        while acc_dist < SECTOR_DIST:
-            _, prev_error = line_follow_step(left, right, light, prev_error)
-            state, prev_l, prev_r, acc_dist = update_odometry(
-                state, prev_l, prev_r, acc_dist, left, right
-            )
-            time.sleep(FOLLOW_DT)
+    prev_l = left.position
+    prev_r = right.position
+    acc_dist = 0.0
+    sectors_passed = 0
+
+    while sectors_passed < n:
+        _, prev_error = line_follow_step(left, right, light, prev_error)
+        state, prev_l, prev_r, acc_dist = update_odometry(
+            state, prev_l, prev_r, acc_dist, left, right
+        )
+        time.sleep(FOLLOW_DT)
+
+        if acc_dist >= SECTOR_DIST:
+            acc_dist -= SECTOR_DIST
+            sectors_passed += 1
+            print(f"[NAV] passed sector {sectors_passed}/{n}")
+
+    left.power_command = 0.0
+    right.power_command = 0.0
 
 
 # -----------------------------------------------------------------
@@ -296,6 +305,6 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
 
 
 if __name__ == "__main__":
-    MAP  = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0]
+    MAP  = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0]
     GOAL = 5
     localize_and_navigate(MAP, GOAL)
