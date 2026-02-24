@@ -11,9 +11,9 @@ left_motor = 1
 
 base_power = 0.5
 
-target_lux = 85
-kp = 0.08
-kd = 0.009
+target_lux = 105
+kp = 0.02
+kd = 0.006
 dt = 0.1
 
 
@@ -48,8 +48,8 @@ def main():
             error = lux - target_lux
             capped_error = max(-10, min(10, error))
             steer = kp * capped_error + kd * (capped_error - prev_error) / dt
-            right_pwr = base_power - steer
-            left_pwr = base_power + steer
+            right_pwr = base_power + steer
+            left_pwr = base_power - steer
 
             right.power_command = right_motor * max(-1.0, min(1.0, right_pwr))
             left.power_command = left_motor * max(-1.0, min(1.0, left_pwr))
