@@ -19,10 +19,10 @@ BLOCK_THRESHOLD_CM = 35.0
 P_HIT              = 0.75
 P_MISS             = 1 - P_HIT
 
-NUM_PARTICLES    = 3200
+NUM_PARTICLES    = 1600
 MOTION_NOISE_STD = 0.3
 
-CONFIDENCE_THRESHOLD = 0.6
+CONFIDENCE_THRESHOLD = 0.60
 TIME_LIMIT_S         = 65
 
 WHEEL_RADIUS   = 1.125
@@ -36,12 +36,12 @@ LEFT_CH    = 1
 RIGHT_CH   = 4
 RIGHT_DIR  = -1
 LEFT_DIR   = 1
-BASE_POWER = 0.5
-TARGET_LUX = 108.5
-KP         = 0.033
-KD         = 0.0063
+BASE_POWER = 0.40
+TARGET_LUX = 27
+KP         = 0.04
+KD         = 0.005
 FOLLOW_DT  = 0.1
-SECTOR_DIST = 5.5
+SECTOR_DIST = 5.497
 
 # -----------------------------------------------------------------
 #  HARDWARE
@@ -264,7 +264,10 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
                 sector, prob = best_estimate(particles)
                 print(f"[TIME] {elapsed:.1f}s — forcing: sector {sector} ({prob:.1%})")
                 remaining = (goal_sector - sector) % NUM_SECTORS
-                drive_n_sectors(left, right, light, remaining)
+                try:
+                    drive_n_sectors(left, right, light, remaining)
+                except Exception as e:
+                    print(f"[ERR] drive_n_sectors failed: {e}")
                 return
 
             _, prev_error = line_follow_step(left, right, light, prev_error)
@@ -305,6 +308,8 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
 
 
 if __name__ == "__main__":
-    MAP  = [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0]
-    GOAL = 5
+    MAP  = [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]
+    #       0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15
+    #      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    GOAL = 9
     localize_and_navigate(MAP, GOAL)
