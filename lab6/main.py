@@ -174,7 +174,7 @@ def read_tof_cm(dist) -> float:
         raise ValueError("VL53L4CX returned None — no data ready")
     return float(reading)
 
-zz
+
 # -----------------------------------------------------------------
 #  DISCRETE BAYES FILTER
 # -----------------------------------------------------------------

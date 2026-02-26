@@ -23,7 +23,7 @@ NUM_PARTICLES    = 1600
 MOTION_NOISE_STD = 0.3
 
 CONFIDENCE_THRESHOLD = 0.60
-TIME_LIMIT_S         = 65
+TIME_LIMIT_S         = 75
 
 WHEEL_RADIUS   = 1.125
 WHEELBASE      = 6.25
@@ -308,8 +308,8 @@ def localize_and_navigate(map_bits, goal_sector, sector_count = 0):
 
 
 if __name__ == "__main__":
-    MAP  = [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]
+    MAP  = [1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
     #       0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15
     #      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    GOAL = 9
+    GOAL = 11
     localize_and_navigate(MAP, GOAL)
